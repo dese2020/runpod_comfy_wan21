@@ -36,3 +36,10 @@ RUN comfy model download --url https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_
 #RUN comfy model download --url https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_t2v_14B_bf16.safetensors --relative-path models/diffusion_models --filename wan2.1_t2v_14B_bf16.safetensors
 
 COPY 4xLSDIR.pth /comfyui/models/upscale_models/4xLSDIR.pth
+
+# ---- Install SageAttention ----
+RUN pip install --no-cache-dir sageattention
+ENV COMFY_USE_SAGEATTN=1
+
+# Copiar tu handler modificado (imágenes + videos)
+COPY handler.py /runpod/handler.py
