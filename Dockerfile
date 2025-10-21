@@ -37,9 +37,14 @@ RUN comfy model download --url https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_
 
 COPY 4xLSDIR.pth /comfyui/models/upscale_models/4xLSDIR.pth
 
+# ---- Install SageAttention dependencies ----
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
 # ---- Install SageAttention ----
 RUN pip install --no-cache-dir sageattention
 ENV COMFY_USE_SAGEATTN=1
 
-# Copiar tu handler modificado (imágenes + videos)
+# Copy custom handler
 COPY handler.py /runpod/handler.py
