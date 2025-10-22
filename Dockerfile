@@ -21,7 +21,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     wget \
     curl \
-    libcuda1-525 \
     && rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip & install SageAttention
