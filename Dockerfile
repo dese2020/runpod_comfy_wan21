@@ -83,7 +83,7 @@ COPY --from=build /comfyui /comfyui
 
 # Copy only the required Python packages (SageAttention + dependencies)
 COPY --from=build /usr/local/lib/python3.12/site-packages/sageattention* /usr/local/lib/python3.12/site-packages/
-COPY --from=build /usr/local/lib/python3.12/site-packages/triton /usr/local/lib/python3.12/site-packages/triton
+#COPY --from=build /usr/local/lib/python3.12/site-packages/triton /usr/local/lib/python3.12/site-packages/triton
 COPY --from=build /usr/local/lib/python3.12/site-packages/torch* /usr/local/lib/python3.12/site-packages/
 COPY --from=build /usr/local/lib/python3.12/site-packages/typing_extensions* /usr/local/lib/python3.12/site-packages/
 
