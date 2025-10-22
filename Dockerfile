@@ -33,16 +33,19 @@ RUN pip install --no-cache-dir \
     nvidia-cublas-cu12
 
 # Upgrade pip & install SageAttention
+ENV TORCH_CUDA_ARCH_LIST="8.9"
+
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+RUN python -m torch.utils.collect_env
+RUN pip install --no-cache-dir ninja packaging
+RUN pip install --no-cache-dir git+https://github.com/thu-ml/SageAttention.git
 
 # Instalar SageAttention
-ENV CUDA_HOME=/opt/venv
-ENV PATH=${CUDA_HOME}/bin:${PATH}
-WORKDIR /
-RUN git clone https://github.com/thu-ml/SageAttention.git
-WORKDIR /SageAttention
-RUN sed -i "/compute_capabilities = set()/a compute_capabilities = {\"$TORCH_CUDA_ARCH_LIST\"}" setup.py
-RUN python setup.py install
+#WORKDIR /
+#RUN git clone https://github.com/thu-ml/SageAttention.git
+#WORKDIR /SageAttention
+#RUN sed -i "/compute_capabilities = set()/a compute_capabilities = {\"$TORCH_CUDA_ARCH_LIST\"}" setup.py
+#RUN python setup.py install
 
 # install custom nodes using comfy-cli
 RUN comfy-node-install comfyui_ultimatesdupscale comfyui-kjnodes rgthree-comfy comfyui-videohelpersuite mikey_nodes comfyui-impact-pack comfyui-easy-use comfyui-florence2 comfyui_essentials cg-image-filter comfyui_layerstyle cg-use-everywhere comfyui-segment-anything-2 comfyui-frame-interpolation comfyui-detail-daemon ComfyUI-WanVideoWrapper comfyui-rmbg
@@ -88,23 +91,3 @@ COPY handler.py /handler.py
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
-# ---- Stage 2: Final ----
-#FROM runpod/worker-comfyui:5.5.0-base
-#
-#ENV COMFY_USE_SAGEATTN=1
-#ENV PATH=/usr/local/cuda/bin:$PATH
-#ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
-#
-## Copy custom nodes and models from build stage
-#COPY --from=build /comfyui /comfyui
-#
-## Copy only the required Python packages (SageAttention + dependencies)
-#COPY --from=build /usr/local/lib/python3.12/site-packages/sageattention* /usr/local/lib/python3.12/site-packages/
-##COPY --from=build /usr/local/lib/python3.12/site-packages/triton /usr/local/lib/python3.12/site-packages/triton
-#COPY --from=build /usr/local/lib/python3.12/site-packages/torch* /usr/local/lib/python3.12/site-packages/
-#COPY --from=build /usr/local/lib/python3.12/site-packages/typing_extensions* /usr/local/lib/python3.12/site-packages/
-#
-## Copy handler
-#COPY --from=build /runpod/handler.py /runpod/handler.py
-#COPY --from=build /start.sh /start.sh
-#RUN chmod +x /start.sh
