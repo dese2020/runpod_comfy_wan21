@@ -3,9 +3,11 @@
 FROM runpod/worker-comfyui:5.5.0-base
 
 # Variables de entorno
-ENV COMFY_USE_SAGEATTN=1
-ENV PATH=/usr/local/cuda/bin:$PATH
-ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+# setup CUDA env for torch & cpp extensions
+ENV CUDA_HOME=/usr/local/cuda
+ENV PATH=${CUDA_HOME}/bin:${PATH}
+ENV LD_LIBRARY_PATH=${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}
+ENV TORCH_CUDA_ARCH_LIST="8.9;9.0"
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -23,13 +25,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     wget \
     curl ffmpeg ninja-build \
     && rm -rf /var/lib/apt/lists/*
+	
+# lightweight CUDA toolkit (includes nvcc, cublas, etc.)
+RUN pip install --no-cache-dir \
+    nvidia-cuda-runtime-cu12 \
+    nvidia-cuda-nvcc-cu12 \
+    nvidia-cublas-cu12
 
 # Upgrade pip & install SageAttention
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 
 # Instalar SageAttention
-#RUN pip install --no-cache-dir sageattention
-ENV TORCH_CUDA_ARCH_LIST="8.9;9.0"
 WORKDIR /
 RUN git clone https://github.com/thu-ml/SageAttention.git
 WORKDIR /SageAttention
