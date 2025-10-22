@@ -1,5 +1,6 @@
 # ---- Stage 1: Build ----
-FROM runpod/worker-comfyui:5.5.0-base AS build
+#FROM runpod/worker-comfyui:5.5.0-base AS build
+FROM runpod/worker-comfyui:5.5.0-base
 
 # Variables de entorno
 ENV COMFY_USE_SAGEATTN=1
@@ -30,7 +31,7 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 RUN pip install --no-cache-dir sageattention
 
 # install custom nodes using comfy-cli
-RUN comfy-node-install comfyui_ultimatesdupscale comfyui-kjnodes rgthree-comfy comfyui-videohelpersuite mikey_nodes comfyui-impact-pack comfyui-easy-use comfyui-florence2 was-node-suite-comfyui comfyui_essentials cg-image-filter comfyui_layerstyle cg-use-everywhere comfyui-segment-anything-2 comfyui-frame-interpolation comfyui-detail-daemon ComfyUI-WanVideoWrapper comfyui-rmbg
+RUN comfy-node-install comfyui_ultimatesdupscale comfyui-kjnodes rgthree-comfy comfyui-videohelpersuite mikey_nodes comfyui-impact-pack comfyui-easy-use comfyui-florence2 comfyui_essentials cg-image-filter comfyui_layerstyle cg-use-everywhere comfyui-segment-anything-2 comfyui-frame-interpolation comfyui-detail-daemon ComfyUI-WanVideoWrapper comfyui-rmbg
 
 RUN for repo in \
     https://github.com/JPS-GER/ComfyUI_JPS-Nodes.git \
@@ -43,6 +44,7 @@ RUN for repo in \
 	https://github.com/welltop-cn/ComfyUI-TeaCache.git \
 	https://github.com/Fannovel16/comfyui_controlnet_aux.git \
 	https://github.com/theUpsider/ComfyUI-Logic.git \
+	https://github.com/WASasquatch/was-node-suite-comfyui.git \
     https://github.com/M1kep/ComfyLiterals.git; \
     do \
         cd /comfyui/custom_nodes; \
@@ -68,26 +70,27 @@ RUN comfy model download --url https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_
 #RUN comfy model download --url https://huggingface.co/Comfy-Org/Wan_2.1_ComfyUI_repackaged/resolve/main/split_files/diffusion_models/wan2.1_t2v_14B_bf16.safetensors --relative-path models/diffusion_models --filename wan2.1_t2v_14B_bf16.safetensors
 
 COPY 4xLSDIR.pth /comfyui/models/upscale_models/4xLSDIR.pth
-COPY handler.py /runpod/handler.py
+COPY handler.py /handler.py
 COPY start.sh /start.sh
+RUN chmod +x /start.sh
 
 # ---- Stage 2: Final ----
-FROM runpod/worker-comfyui:5.5.0-base
-
-ENV COMFY_USE_SAGEATTN=1
-ENV PATH=/usr/local/cuda/bin:$PATH
-ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
-
-# Copy custom nodes and models from build stage
-COPY --from=build /comfyui /comfyui
-
-# Copy only the required Python packages (SageAttention + dependencies)
-COPY --from=build /usr/local/lib/python3.12/site-packages/sageattention* /usr/local/lib/python3.12/site-packages/
-#COPY --from=build /usr/local/lib/python3.12/site-packages/triton /usr/local/lib/python3.12/site-packages/triton
-COPY --from=build /usr/local/lib/python3.12/site-packages/torch* /usr/local/lib/python3.12/site-packages/
-COPY --from=build /usr/local/lib/python3.12/site-packages/typing_extensions* /usr/local/lib/python3.12/site-packages/
-
-# Copy handler
-COPY --from=build /runpod/handler.py /runpod/handler.py
-COPY --from=build /start.sh /start.sh
-RUN chmod +x /start.sh
+#FROM runpod/worker-comfyui:5.5.0-base
+#
+#ENV COMFY_USE_SAGEATTN=1
+#ENV PATH=/usr/local/cuda/bin:$PATH
+#ENV LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+#
+## Copy custom nodes and models from build stage
+#COPY --from=build /comfyui /comfyui
+#
+## Copy only the required Python packages (SageAttention + dependencies)
+#COPY --from=build /usr/local/lib/python3.12/site-packages/sageattention* /usr/local/lib/python3.12/site-packages/
+##COPY --from=build /usr/local/lib/python3.12/site-packages/triton /usr/local/lib/python3.12/site-packages/triton
+#COPY --from=build /usr/local/lib/python3.12/site-packages/torch* /usr/local/lib/python3.12/site-packages/
+#COPY --from=build /usr/local/lib/python3.12/site-packages/typing_extensions* /usr/local/lib/python3.12/site-packages/
+#
+## Copy handler
+#COPY --from=build /runpod/handler.py /runpod/handler.py
+#COPY --from=build /start.sh /start.sh
+#RUN chmod +x /start.sh
