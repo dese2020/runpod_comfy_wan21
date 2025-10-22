@@ -21,14 +21,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libssl-dev \
     git \
     wget \
-    curl \
+    curl ffmpeg ninja-build \
     && rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip & install SageAttention
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 
 # Instalar SageAttention
-RUN pip install --no-cache-dir sageattention
+#RUN pip install --no-cache-dir sageattention
+ENV TORCH_CUDA_ARCH_LIST="8.9;9.0"
+WORKDIR /
+RUN git clone https://github.com/thu-ml/SageAttention.git
+WORKDIR /SageAttention
+RUN sed -i "/compute_capabilities = set()/a compute_capabilities = {\"$TORCH_CUDA_ARCH_LIST\"}" setup.py
+RUN python setup.py install
 
 # install custom nodes using comfy-cli
 RUN comfy-node-install comfyui_ultimatesdupscale comfyui-kjnodes rgthree-comfy comfyui-videohelpersuite mikey_nodes comfyui-impact-pack comfyui-easy-use comfyui-florence2 comfyui_essentials cg-image-filter comfyui_layerstyle cg-use-everywhere comfyui-segment-anything-2 comfyui-frame-interpolation comfyui-detail-daemon ComfyUI-WanVideoWrapper comfyui-rmbg
