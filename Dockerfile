@@ -36,6 +36,8 @@ RUN pip install --no-cache-dir \
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel
 
 # Instalar SageAttention
+ENV CUDA_HOME=/opt/venv
+ENV PATH=${CUDA_HOME}/bin:${PATH}
 WORKDIR /
 RUN git clone https://github.com/thu-ml/SageAttention.git
 WORKDIR /SageAttention
